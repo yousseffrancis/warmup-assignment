@@ -1,5 +1,8 @@
 const fs = require("fs");
 
+// Converts a time string in format "hh:mm:ss am/pm" to total seconds
+// Used to make time calculations easier for shift duration and idle time
+
 function parseTimeToSeconds(timeStr) {
     timeStr = timeStr.trim().toLowerCase();
     const parts = timeStr.split(" ");
@@ -19,10 +22,16 @@ function parseTimeToSeconds(timeStr) {
     return h * 3600 + m * 60 + s;
 }
 
+// Converts a duration string "h:mm:ss" to seconds
+// Helps perform calculations between shift duration and idle time
+
 function parseDurationToSeconds(dur) {
     const parts = dur.trim().split(":");
     return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
 }
+
+// Converts seconds back to time format "h:mm:ss"
+// Used to display results like shift duration and active time
 
 function secondsToHMS(sec) {
     const h = Math.floor(sec / 3600);
@@ -31,6 +40,9 @@ function secondsToHMS(sec) {
     return h + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
 }
 
+// Converts seconds to "hhh:mm:ss" format for monthly totals
+// Ensures total hours can exceed 24 hours when summing many shifts
+
 function secondsToHHHMS(sec) {
     const h = Math.floor(sec / 3600);
     const m = Math.floor((sec % 3600) / 60);
@@ -38,14 +50,20 @@ function secondsToHHHMS(sec) {
     return h + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
 }
 
+// Calculates the total shift duration between start and end time
+// Returns the duration of the shift formatted as h:mm:ss
 // Function 1
+
 function getShiftDuration(startTime, endTime) {
     const start = parseTimeToSeconds(startTime);
     const end = parseTimeToSeconds(endTime);
     return secondsToHMS(end - start);
 }
 
+// Calculates the idle time outside delivery hours (8 AM – 10 PM)
+// Returns how much time of the shift is considered idle
 // Function 2
+
 function getIdleTime(startTime, endTime) {
     const start = parseTimeToSeconds(startTime);
     const end = parseTimeToSeconds(endTime);
@@ -65,7 +83,8 @@ function getIdleTime(startTime, endTime) {
 
     return secondsToHMS(idle);
 }
-
+// Calculates active delivery time during the shift
+// Active time = shift duration minus idle time
 // Function 3
 
 function getActiveTime(shiftDuration, idleTime) {
@@ -74,6 +93,8 @@ function getActiveTime(shiftDuration, idleTime) {
     return secondsToHMS(shift - idle);
 }
 
+// Checks whether a driver met the required daily working quota
+// Uses 8h24m normally or 6h during the Eid period
 // Function 4
 function metQuota(date, activeTime) {
     const eidStart = new Date("2025-04-10");
@@ -90,6 +111,8 @@ function metQuota(date, activeTime) {
     return parseDurationToSeconds(activeTime) >= quota;
 }
 
+// Adds a new shift record to the shifts file if it does not already exist
+// Returns the created record object or an empty object if duplicate
 // Function 5
 function addShiftRecord(textFile, shiftObj) {
 
@@ -149,7 +172,8 @@ function addShiftRecord(textFile, shiftObj) {
     return newRecord;
 }
 
-
+// Updates the bonus status for a specific driver and date
+// Writes the updated value directly into the shifts text file
 // Function 6
 function setBonus(textFile, driverID, date, newValue) {
 
@@ -170,7 +194,8 @@ function setBonus(textFile, driverID, date, newValue) {
     fs.writeFileSync(textFile, lines.join("\n"));
 }
 
-
+// Counts how many bonuses a driver received in a specific month
+// Returns the number of bonuses or -1 if the driver does not exist
 // Function 7
 
 function countBonusPerMonth(textFile, driverID, month) {
@@ -203,7 +228,8 @@ function countBonusPerMonth(textFile, driverID, month) {
     return found ? count : -1;
 }
 
-
+// Calculates the total active hours worked by a driver in a month
+// Returns the sum of active time values in hhh:mm:ss format
 // Function 8
 
 function getTotalActiveHoursPerMonth(textFile, driverID, month) {
@@ -231,8 +257,10 @@ function getTotalActiveHoursPerMonth(textFile, driverID, month) {
     return secondsToHHHMS(total);
 }
 
-
+// Calculates the required working hours for a driver in a given month
+// Excludes day-off shifts and reduces hours when bonuses exist
 // Function 9
+
 function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, month) {
 
     const shiftLines = fs.readFileSync(textFile, "utf8")
@@ -286,6 +314,8 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
     return secondsToHHHMS(total);
 }
 
+// Calculates the driver’s final net pay after deductions
+// Deducts salary based on missing hours beyond tier allowance
 // Function 10
 
 function getNetPay(driverID, actualHours, requiredHours, rateFile) {
