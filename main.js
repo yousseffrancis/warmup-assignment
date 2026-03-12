@@ -1,4 +1,4 @@
-// implement functions 1 to 4
+// implement functions 5 to 10
 const fs = require("fs");
 
 // ============================================================
