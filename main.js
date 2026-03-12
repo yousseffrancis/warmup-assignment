@@ -39,16 +39,18 @@ function secondsToHHHMS(sec) {
     return h + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
 }
 
-
+// ============================================================
 // Function 1
+// ============================================================
 function getShiftDuration(startTime, endTime) {
     const start = parseTimeToSeconds(startTime);
     const end = parseTimeToSeconds(endTime);
     return secondsToHMS(end - start);
 }
 
-
+// ============================================================
 // Function 2
+// ============================================================
 function getIdleTime(startTime, endTime) {
     const start = parseTimeToSeconds(startTime);
     const end = parseTimeToSeconds(endTime);
@@ -69,16 +71,18 @@ function getIdleTime(startTime, endTime) {
     return secondsToHMS(idle);
 }
 
+// ============================================================
 // Function 3
-
+// ============================================================
 function getActiveTime(shiftDuration, idleTime) {
     const shift = parseDurationToSeconds(shiftDuration);
     const idle = parseDurationToSeconds(idleTime);
     return secondsToHMS(shift - idle);
 }
 
+// ============================================================
 // Function 4
-
+// ============================================================
 function metQuota(date, activeTime) {
     const eidStart = new Date("2025-04-10");
     const eidEnd = new Date("2025-04-30");
@@ -94,8 +98,9 @@ function metQuota(date, activeTime) {
     return parseDurationToSeconds(activeTime) >= quota;
 }
 
+// ============================================================
 // Function 5
-
+// ============================================================
 function addShiftRecord(textFile, shiftObj) {
 
     const { driverID, driverName, date, startTime, endTime } = shiftObj;
@@ -154,8 +159,9 @@ function addShiftRecord(textFile, shiftObj) {
     return newRecord;
 }
 
-
+// ============================================================
 // Function 6
+// ============================================================
 function setBonus(textFile, driverID, date, newValue) {
 
     const lines = fs.readFileSync(textFile, "utf8").split("\n");
@@ -175,9 +181,9 @@ function setBonus(textFile, driverID, date, newValue) {
     fs.writeFileSync(textFile, lines.join("\n"));
 }
 
-
+// ============================================================
 // Function 7
-
+// ============================================================
 function countBonusPerMonth(textFile, driverID, month) {
 
     const lines = fs.readFileSync(textFile, "utf8")
@@ -208,9 +214,9 @@ function countBonusPerMonth(textFile, driverID, month) {
     return found ? count : -1;
 }
 
-
+// ============================================================
 // Function 8
-
+// ============================================================
 function getTotalActiveHoursPerMonth(textFile, driverID, month) {
 
     const lines = fs.readFileSync(textFile, "utf8")
@@ -236,9 +242,9 @@ function getTotalActiveHoursPerMonth(textFile, driverID, month) {
     return secondsToHHHMS(total);
 }
 
-
+// ============================================================
 // Function 9
-
+// ============================================================
 function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, month) {
 
     const shiftLines = fs.readFileSync(textFile, "utf8")
@@ -292,9 +298,9 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
     return secondsToHHHMS(total);
 }
 
-
+// ============================================================
 // Function 10
-
+// ============================================================
 function getNetPay(driverID, actualHours, requiredHours, rateFile) {
 
     const rateLines = fs.readFileSync(rateFile, "utf8")
